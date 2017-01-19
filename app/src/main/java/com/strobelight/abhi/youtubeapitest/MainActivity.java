@@ -18,7 +18,9 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.util.Joiner;
-import com.google.api.services.samples.youtube.cmdline.Auth;
+
+//these are the ones giving me grief
+//import com.google.api.services.samples.youtube.cmdline.Auth;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.GeoPoint;
 import com.google.api.services.youtube.model.SearchListResponse;
@@ -33,6 +35,28 @@ public class MainActivity extends YouTubeBaseActivity {
     private YouTubePlayer.OnInitializedListener onInitializedListener;
 
     private static String url = "https://www.googleapis.com/youtube/v3/search";
+    private static String videoURL = "dQw4w9WgXcQ";
+    private static String queryText = "Rick Roll";
+
+    private Search search;
+
+    private static final String apiKey = "AIzaSyCmL8ycwQoL1UDUz9EWpWHTq3hy3e7r2ck";
+
+    public void setVideoURL (String video) {
+        videoURL = video;
+    }
+
+    public String getVideoURL () {
+        return videoURL;
+    }
+
+    public void setQueryText (String query) {
+        queryText = query;
+    }
+
+    public String getQueryText () {
+        return queryText;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +70,7 @@ public class MainActivity extends YouTubeBaseActivity {
         onInitializedListener = new YouTubePlayer.OnInitializedListener(){
             @Override
             public void onInitializationSuccess (YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b){
-                youTubePlayer.loadVideo("dQw4w9WgXcQ");
+                youTubePlayer.loadVideo(chooseVideo());
             }
 
             @Override
@@ -59,11 +83,18 @@ public class MainActivity extends YouTubeBaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Search Text Entered: \"" + editText.getText().toString() + "\"", Snackbar.LENGTH_LONG)
+                setQueryText(editText.getText().toString());
+                Snackbar.make(view, "Search Text Entered: \"" + getQueryText() + "\", Video URL: \"" + chooseVideo() + "\"", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                youTubePlayerView.initialize("AIzaSyCmL8ycwQoL1UDUz9EWpWHTq3hy3e7r2ck", onInitializedListener);
+                youTubePlayerView.initialize(apiKey, onInitializedListener);
             }
         });
+    }
+
+    private String chooseVideo () {
+        String query = getQueryText();
+
+        return search.getFirstURL(query);
     }
 
     /*public void searchYT (View view) {
