@@ -14,6 +14,9 @@ package com.strobelight.abhi.youtubeapitest;
  * the License.
  */
 
+        import android.os.AsyncTask;
+        import android.os.Handler;
+
         import com.google.api.client.googleapis.json.GoogleJsonResponseException;
         import com.google.api.client.http.HttpRequest;
         import com.google.api.client.http.HttpRequestInitializer;
@@ -41,12 +44,24 @@ package com.strobelight.abhi.youtubeapitest;
  *
  * @author Jeremy Walker
  */
-public class Search {
+public class Search extends AsyncTask<String, Integer, String>{
+    public AsyncResponse delegate = null;
 
     /**
      * Define a global variable that identifies the name of a file that
      * contains the developer's API key.
      */
+
+    protected String doInBackground (String... input){
+        return getFirstURL(input[0]);
+    }
+
+    protected void onPostExecute(String result) {
+        //somehow send result back to main activity
+        //fuck it ask for help
+        setVideoURL(result);
+    }
+
     private static final String PROPERTIES_FILENAME = "youtube.properties";
     private static final String API_KEY = "AIzaSyCmL8ycwQoL1UDUz9EWpWHTq3hy3e7r2ck";
 
@@ -158,7 +173,6 @@ public class Search {
 
     public static String getFirstURL (String query) {
         String retURL = "2k0SmqbBIpQ";
-
         try {
             System.out.println("=============== try block started =================");
             // This object is used to make YouTube Data API requests. The last
