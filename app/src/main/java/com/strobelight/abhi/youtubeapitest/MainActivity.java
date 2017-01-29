@@ -1,5 +1,6 @@
 package com.strobelight.abhi.youtubeapitest;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,17 +19,28 @@ import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Joiner;
 
 //these are the ones giving me grief
 //import com.google.api.services.samples.youtube.cmdline.Auth;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.GeoPoint;
+import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Thumbnail;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 public class MainActivity extends YouTubeBaseActivity implements AsyncResponse{
 
@@ -47,7 +59,7 @@ public class MainActivity extends YouTubeBaseActivity implements AsyncResponse{
         Log.i("test", output);
     }
 
-    public void setVideoURL (String video) {
+    public static void setVideoURL (String video) {
         videoURL = video;
     }
 
@@ -98,7 +110,7 @@ public class MainActivity extends YouTubeBaseActivity implements AsyncResponse{
                 //search.execute(getQueryText());
 
                 chooseVideo();
-                youTubePlayerView.initialize(apiKey, onInitializedListener);
+                //youTubePlayerView.initialize(apiKey, onInitializedListener);
             }
         });
     }
