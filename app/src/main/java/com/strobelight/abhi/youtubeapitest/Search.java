@@ -59,7 +59,7 @@ public class Search extends AsyncTask<String, Integer, String>{
     protected void onPostExecute(String result) {
         //somehow send result back to main activity
         //fuck it ask for help
-        setVideoURL(result);
+        MainActivity.setVideoURL(result);
     }
 
     private static final String PROPERTIES_FILENAME = "youtube.properties";
