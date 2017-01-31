@@ -16,47 +16,25 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Joiner;
 
-//these are the ones giving me grief
-//import com.google.api.services.samples.youtube.cmdline.Auth;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.GeoPoint;
-import com.google.api.services.youtube.model.ResourceId;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
-import com.google.api.services.youtube.model.Thumbnail;
-import com.google.api.services.youtube.model.Video;
-import com.google.api.services.youtube.model.VideoListResponse;
+public class MainActivity extends YouTubeBaseActivity implements SearchTwo.AsyncResponse{
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
-public class MainActivity extends YouTubeBaseActivity implements AsyncResponse{
+    private YouTubePlayer actualPlayer;
 
     private YouTubePlayerView youTubePlayerView;
     private YouTubePlayer.OnInitializedListener onInitializedListener;
+    private YouTubePlayer.PlayerStateChangeListener playerStateChangeListener;
 
     private static String url = "https://www.googleapis.com/youtube/v3/search";
     private static String videoURL = "dQw4w9WgXcQ";
     private static String queryText = "Rick Roll";
 
-    private Search search = new Search();
-
     private static final String apiKey = "AIzaSyCmL8ycwQoL1UDUz9EWpWHTq3hy3e7r2ck";
 
     public void processFinish(String output){
-        Log.i("test", output);
+        Log.i("callback::processFinish", output);
+//        setVideoURL(output);
+        actualPlayer.loadVideo(output);
     }
 
     public static void setVideoURL (String video) {
@@ -67,27 +45,58 @@ public class MainActivity extends YouTubeBaseActivity implements AsyncResponse{
         return videoURL;
     }
 
-    public void setQueryText (String query) {
-        queryText = query;
-    }
-
     public String getQueryText () {
         return queryText;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        search.delegate = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
         final EditText editText = (EditText) findViewById(R.id.searchField);
 
         youTubePlayerView = (YouTubePlayerView) findViewById(R.id.videoPlayer);
+        playerStateChangeListener = new YouTubePlayer.PlayerStateChangeListener() {
+            @Override
+            public void onLoading() {
+                Log.i("YouTubeStateChange", "onLoading");
+            }
+
+            @Override
+            public void onLoaded(String s) {
+
+                Log.i("YouTubeStateChange", "onLoaded");
+            }
+
+            @Override
+            public void onAdStarted() {
+                Log.i("YouTubeStateChange", "onAdStarted");
+            }
+
+            @Override
+            public void onVideoStarted() {
+                Log.i("YouTubeStateChange", "onVideoStarted");
+            }
+
+            @Override
+            public void onVideoEnded() {
+                Log.i("YouTubeStateChange", "onVideoEnded");
+                // Play next video??
+            }
+
+            @Override
+            public void onError(YouTubePlayer.ErrorReason errorReason) {
+                Log.e("YouTubeStateChange", "onError");
+            }
+        };
         onInitializedListener = new YouTubePlayer.OnInitializedListener(){
             @Override
-            public void onInitializationSuccess (YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b){
+            public void onInitializationSuccess (YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean wasRestored){
+                if (actualPlayer == null) {
+                    actualPlayer = youTubePlayer;
+                }
+                youTubePlayer.setPlayerStateChangeListener(playerStateChangeListener);
                 youTubePlayer.loadVideo(getVideoURL());
             }
 
@@ -96,35 +105,29 @@ public class MainActivity extends YouTubeBaseActivity implements AsyncResponse{
 
             }
         };
+        youTubePlayerView.initialize(apiKey, onInitializedListener);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setQueryText(editText.getText().toString());
-
-                search.execute(getQueryText());
+                if (!newSearch(editText.getText().toString())) {
+                    Log.i("onClick", "Query input was zero");
+                }
                 Snackbar.make(view, "Search Text Entered: \"" + getQueryText() + "\", Video URL: \"" + getVideoURL() + "\"", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                chooseVideo();
-                //search.execute(getQueryText());
-
-                chooseVideo();
-                //youTubePlayerView.initialize(apiKey, onInitializedListener);
             }
         });
     }
 
-    private void chooseVideo () {
-        String query = getQueryText();
-        search.execute(query);
 
-        //return search.getFirstURL(query);
+    protected boolean newSearch(String query) {
+        if (query.length() == 0) {
+            return false;
+        }
+        new SearchTwo(this, query);
+        return true;
     }
-
-    /*public void searchYT (View view) {
-        Intent intent = new Intent(this, /*display class);
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
